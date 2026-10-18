@@ -1,97 +1,314 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Pet Legends 3D: Boss Hunters</title>
-<style>
-:root{--line:#42678d;--gold:#ffd166;--text:#f2f7ff;--muted:#bdd0e5}
-*{box-sizing:border-box}body{margin:0;background:#06101c;color:var(--text);font-family:system-ui,Segoe UI,Arial,sans-serif;overflow:hidden}#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%}
-.hud{position:fixed;z-index:3;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:12px;gap:10px;pointer-events:none}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.brand,.stats,.card,.bottom,#collectionPanel{background:#07182be8;border:1px solid var(--line);border-radius:15px;backdrop-filter:blur(8px);box-shadow:0 8px 30px #0005}.brand{padding:10px 13px;font-weight:1000}.brand span{color:var(--gold)}.small{font-size:11px;color:var(--muted)}.stats{padding:9px 12px;display:flex;gap:12px;flex-wrap:wrap;font-size:13px;font-weight:850}.card{padding:10px 12px;max-width:45vw}.card h3{font-size:13px;margin:0 0 5px}.bar{height:8px;border-radius:99px;background:#020813;margin-top:5px;overflow:hidden}.bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff526c,#ffb15e)}.petbar i{background:linear-gradient(90deg,#36d9ff,#7cffb3)}
-.bossrow{display:flex;justify-content:space-between;gap:8px}.bottom{pointer-events:auto;align-self:center;width:min(900px,100%);padding:9px;display:flex;justify-content:space-between;gap:8px;align-items:center}.actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}button{border:1px solid #50769c;background:linear-gradient(#285078,#142a46);color:white;font:inherit;font-size:12px;font-weight:850;border-radius:11px;padding:10px 12px;cursor:pointer;min-height:39px}button:active{transform:scale(.97)}button.gold{background:linear-gradient(#ffe08a,#d99025);color:#261500;border-color:#ffe8a4}button.purple{background:linear-gradient(#bb7bff,#643db5)}button.green{background:linear-gradient(#3bd8a0,#167b68)}.move{display:grid;grid-template-columns:repeat(3,34px);gap:4px;flex-shrink:0}.move button{padding:4px;min-height:32px}.blank{visibility:hidden}
-.message{position:fixed;z-index:4;top:90px;left:50%;transform:translateX(-50%);max-width:90vw;background:#07172bf0;border:1px solid #5482a8;border-radius:12px;padding:10px 14px;font-size:12px;text-align:center;pointer-events:none}
-#collectionPanel{display:none;position:fixed;z-index:10;inset:4% 3%;padding:14px;overflow:auto}.collection{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:9px;margin-top:12px}.pet{border:1px solid #315273;background:#10213a;border-radius:12px;padding:9px;text-align:center}.orb{width:65px;height:65px;margin:0 auto 6px;border-radius:50%;display:grid;place-items:center;font-size:25px;box-shadow:inset 0 0 18px #fff4,0 0 20px #69e7ff33}.pet b{display:block;font-size:12px}.pet small{display:block;color:var(--muted);font-size:10px;margin:3px}.pet button{width:100%;margin-top:6px;padding:7px}.closeRow{display:flex;justify-content:space-between;align-items:center;gap:10px}
-@media(max-width:620px){.hud{padding:7px}.brand{font-size:12px;padding:8px}.stats{font-size:11px;gap:7px;padding:8px}.card{max-width:48vw;padding:8px}.bottom{padding:7px;align-items:flex-end}.actions{gap:4px;max-width:76%}button{font-size:10px;padding:8px}.move{grid-template-columns:repeat(3,29px)}.move button{min-height:29px}.message{top:78px}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Naija Unites 3D MOBA Mobile</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body { overflow: hidden; background: #0b0e14; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    #canvas-container { width: 100vw; height: 100vh; display: block; position: absolute; top:0; left:0; z-index: 1; }
+    
+    /* MOBILE TOP HUD */
+    #hud {
+      position: absolute; top: 10px; left: 10px; right: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+      color: #fff; pointer-events: none; z-index: 10; font-size: 0.85rem;
+    }
+    .hud-box {
+      background: rgba(15, 23, 42, 0.85); padding: 8px 12px; border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(6px);
+    }
+    .score-title { color: #f1c40f; font-weight: bold; }
+    .naira-text { color: #2ecc71; font-weight: bold; }
+    
+    /* SHOP BUTTON */
+    .btn-shop-open {
+      pointer-events: auto; background: linear-gradient(135deg, #22c55e, #16a34a);
+      border: 2px solid #fff; color: #fff; padding: 6px 14px; border-radius: 20px;
+      font-weight: bold; font-size: 0.8rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
+    /* MOBILE CONTROLS */
+    #controls {
+      position: absolute; bottom: 20px; left: 15px; right: 15px;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      pointer-events: none; z-index: 10;
+    }
+
+    /* VIRTUAL JOYSTICK */
+    #joystick-wrapper {
+      width: 120px; height: 120px; background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 50%;
+      position: relative; pointer-events: auto; touch-action: none;
+    }
+    #joystick-stick {
+      width: 50px; height: 50px; background: rgba(56, 189, 248, 0.85);
+      border: 2px solid #fff; border-radius: 50%; position: absolute;
+      top: 35px; left: 35px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    /* ACTION BUTTONS */
+    .action-group { display: flex; gap: 10px; align-items: flex-end; }
+    .action-btn {
+      width: 65px; height: 65px; border-radius: 50%; border: 2px solid #fff;
+      color: #fff; font-weight: bold; font-size: 0.75rem; display: flex;
+      justify-content: center; align-items: center; pointer-events: auto;
+      touch-action: manipulation; box-shadow: 0 4px 12px rgba(0,0,0,0.5); cursor: pointer;
+    }
+    .action-btn:active { transform: scale(0.9); }
+    #btn-atk { background: linear-gradient(135deg, #e67e22, #d35400); }
+    #btn-score { background: linear-gradient(135deg, #2ecc71, #27ae60); width: 75px; height: 75px; border-color: #f1c40f; }
+    #btn-ult { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+
+    /* MODAL WINDOWS */
+    .modal {
+      position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(11, 14, 20, 0.92); display: flex; flex-direction: column;
+      justify-content: center; align-items: center; color: #fff; z-index: 30; padding: 20px;
+    }
+    .shop-items { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 350px; margin: 15px 0; }
+    .shop-row {
+      background: #1e293b; border: 1px solid #334155; padding: 10px 15px; border-radius: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .btn-buy {
+      background: #22c55e; border: none; color: #fff; padding: 6px 12px;
+      border-radius: 6px; font-weight: bold; cursor: pointer;
+    }
+    .btn-close {
+      padding: 10px 25px; background: #ef4444; border: none; color: #fff;
+      border-radius: 8px; font-weight: bold; cursor: pointer;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-<div id="game"></div>
-<div class="hud">
- <div class="top"><div class="brand">🐾 PET <span>LEGENDS</span><div class="small">3D BOSS HUNTERS</div></div><div class="stats"><span>💰 ₦<b id="money">1200</b></span><span>💎 <b id="gems">10</b></span><span>⭐ Lv <b id="level">1</b></span></div></div>
- <div class="bossrow"><div class="card"><h3 id="petTitle">Mossback • Nature</h3><div class="small" id="petSub">Evolution 0/10 • Level 1/50</div><div class="bar petbar"><i id="petHpBar"></i></div><div class="small" id="petHpText">100 / 100 HP</div></div><div class="card" style="text-align:right"><h3 id="bossTitle">Forest Guardian</h3><div class="small" id="bossSub">Dungeon 1 boss</div><div class="bar"><i id="bossHpBar"></i></div><div class="small" id="bossHpText">160 / 160 HP</div></div></div>
- <div class="bottom"><div class="move"><span class="blank"></span><button data-move="forward">▲</button><span class="blank"></span><button data-move="left">◀</button><button data-move="back">▼</button><button data-move="right">▶</button></div><div class="actions"><button class="gold" id="attack">⚡ Attack</button><button class="purple" id="skill">✨ Special</button><button class="green" id="train">🌱 Train ₦100</button><button id="pets">🐾 Pets</button><button id="evolve">🌟 Evolve</button></div></div>
-</div>
-<div class="message" id="message">Explore the 3D arena. Your pet follows you! Defeat the boss to earn ₦.</div>
-<div id="collectionPanel"><div class="closeRow"><div><h2 style="margin:0 0 5px">Pet Collection</h2><div class="small">Buy, equip and evolve your original 3D creatures.</div></div><button id="closePets">✕ Close</button></div><p class="small">Evolution stages unlock at levels 5, 10, 15 … 50. Each evolution makes the 3D pet larger and stronger.</p><div class="collection" id="collection"></div></div>
-<script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-const $=id=>document.getElementById(id);
-const scene=new THREE.Scene();scene.background=new THREE.Color('#8ad7ef');scene.fog=new THREE.Fog('#8ad7ef',36,100);
-const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.1,200);
-const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;$('game').appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xdaf7ff,0x35415e,2.1));
-const sun=new THREE.DirectionalLight(0xfff3d2,3);sun.position.set(-12,24,10);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
-const material=(c,r=.5,m=.05)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
-const floor=new THREE.Mesh(new THREE.CircleGeometry(42,80),material('#367c62'));floor.rotation.x=-Math.PI/2;floor.position.y=-.12;floor.receiveShadow=true;scene.add(floor);
-const ring=new THREE.Mesh(new THREE.TorusGeometry(13,.18,10,100),material('#8beaff',.25,.35));ring.rotation.x=Math.PI/2;ring.position.y=.03;scene.add(ring);
-const grid=new THREE.GridHelper(84,42,'#b5f4c6','#538b78');grid.position.y=-.1;scene.add(grid);
-function tree(x,z,s=1){let t=new THREE.Mesh(new THREE.CylinderGeometry(.2*s,.32*s,1.8*s,7),material('#79543a'));t.position.set(x,.9*s,z);t.castShadow=true;scene.add(t);for(let j=0;j<3;j++){let c=new THREE.Mesh(new THREE.IcosahedronGeometry(1.2*s-j*.15,1),material(['#3aa778','#42b989','#238c70'][j]));c.position.set(x,(2+j*.52)*s,z);c.castShadow=true;scene.add(c)}}
-for(let i=0;i<22;i++){let a=i/22*Math.PI*2;tree(Math.cos(a)*(19+i%3),Math.sin(a)*(19+i%3),.7+(i%4)*.12)}
-for(let i=0;i<12;i++){let a=i/12*Math.PI*2;let cr=new THREE.Mesh(new THREE.OctahedronGeometry(.8+(i%3)*.2),material(i%2?'#67eaff':'#b18cff',.25,.25));cr.position.set(Math.cos(a)*15,.8,Math.sin(a)*15);cr.castShadow=true;scene.add(cr)}
-function createCreature(color,stage=0,isBoss=false){
- const root=new THREE.Group(),body=material(color,.32,.12),belly=material('#f4f0dc'),dark=material('#1a2437'),white=material('#fff',.2),pupil=material('#182039',.2),evo=material(stage>=8?'#fff1a8':stage>=5?'#ffd166':color,.22,.3);
- const scale=1+stage*.105;
- function add(g,m,x,y,z,sx=1,sy=1,sz=1){const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;root.add(o);return o}
- // All creature parts are actual 3D meshes.
- add(new THREE.SphereGeometry(.78,24,18),body,0,1,0,1.12*scale,.82*scale,1.05*scale);
- add(new THREE.SphereGeometry(.59,24,18),body,0,1.8*scale,.08,.97*scale,1.0*scale,.9*scale);
- add(new THREE.SphereGeometry(.42,20,16),belly,0,.91*scale,.76,.9,.7,.25);
- for(const x of [-.48,.48])for(const z of [-.48,.48])add(new THREE.CapsuleGeometry(.15,.4,4,8),body,x,.34*scale,z);
- for(const side of [-1,1]){let horn=add(new THREE.ConeGeometry(.21+stage*.016,.52+stage*.045,7),stage>=5?evo:body,side*.42,2.4*scale,.04);horn.rotation.z=-side*.38;add(new THREE.SphereGeometry(.13,12,10),white,side*.24,1.97*scale,.61*scale,.8,1,.45);add(new THREE.SphereGeometry(.065,12,10),pupil,side*.26,1.97*scale,.71*scale,.8,1,.5)}
- add(new THREE.SphereGeometry(.15,12,10),dark,0,1.66*scale,.89*scale,1.3,.65,.6);
- let tail=add(new THREE.ConeGeometry(.24+stage*.012,.9+stage*.08,8),body,0,.8*scale,-1.03*scale);tail.rotation.x=-Math.PI/2.6;
- for(let i=0;i<3+Math.floor(stage/2);i++){let xx=(i-(2+Math.floor(stage/2))/2)*.31;let sp=add(new THREE.ConeGeometry(.15+stage*.008,.36+stage*.04,5),evo,xx,2.28*scale,.04);sp.rotation.z=(i%2?-.18:.18)}
- if(stage>=3){for(const side of [-1,1]){let wing=add(new THREE.ConeGeometry(.6+stage*.08,.9+stage*.05,3),stage>=7?evo:body,side*(.78+stage*.025),1.62*scale,-.25);wing.rotation.z=side*.85;wing.rotation.x=-.4}}
- if(stage>=1){let aura=new THREE.Mesh(new THREE.TorusGeometry(1.15+stage*.09,.035+stage*.004,8,48),new THREE.MeshBasicMaterial({color:stage>=8?0xffe9a0:stage>=5?0xffc64b:color,transparent:true,opacity:.72}));aura.position.y=1.12*scale;aura.rotation.x=Math.PI/2;root.add(aura)}
- if(isBoss){for(let i=0;i<5;i++){let sp=add(new THREE.ConeGeometry(.3,.85,5),evo,(i-2)*.42,2.65,0);sp.rotation.z=(i-2)*.15}root.scale.setScalar(1.8)}
- root.userData={stage};return root;
-}
-const baseNames=['Mossback','Splashbit','Cinderling','Pebblit','Galehowl','Voltspark','Cryofang','Voidpaws','Suncrest','Prismcrawler','Nebulump','Ironhorn','Thornbloom','Runewing','Stormclaw','Emberdrake','Moonwhisk','Cloudsprite','Duskscale','Starwarden'];
-const elements=['Nature','Water','Fire','Earth','Wind','Lightning','Ice','Shadow','Light','Crystal','Cosmic','Metal','Poison','Mystic','Storm','Lava'];
-const colors=['#61d88c','#58d8ff','#ff804c','#c6a77b','#b9f3ff','#ffe05c','#9eeaff','#b18cff','#fff0a6','#f78ee5','#8ea5ff','#b9c8dc','#a5ec65','#ff9bde','#71a8ff','#ff633d'];
-const rarities=['Common','Uncommon','Rare','Epic','Legendary','Mythic'],costs=[0,350,900,2200,5000,12000],powers=[10,18,28,43,65,95];
-const pets=[];for(let i=0;i<200;i++){let r=i<60?0:i<105?1:i<150?2:i<180?3:i<195?4:5;let name=i<20?baseNames[i]:baseNames[(i*7+Math.floor(i/4))%20]+' '+['Jr','Prime','Nova','Spirit','EX','Bloom','Reborn','Apex','Ultra','Supreme'][Math.floor(i/20)%10];pets.push({id:i,name,element:elements[i%16],color:colors[i%16],rarity:rarities[r],cost:costs[r]+i%8*80,power:powers[r]+i%10*2,level:1,xp:0,hp:100,maxHp:100,owned:i===0,stage:0,mesh:null})}
-const bosses=[{name:'Forest Guardian',color:'#64e39b',hp:160,reward:350},{name:'Tide Colossus',color:'#51d9ff',hp:380,reward:750},{name:'Cinder Tyrant',color:'#ff764a',hp:700,reward:1300},{name:'Prism Behemoth',color:'#f78ee5',hp:1200,reward:2200},{name:'Void Emperor',color:'#a783ff',hp:2200,reward:4000},{name:'Astral Overlord',color:'#a2b1ff',hp:4000,reward:7500}];
-let save={money:1200,gems:10,level:1,active:0,owned:[0],boss:0,unlocked:1,wins:0,pets:{}};
-try{const old=JSON.parse(localStorage.getItem('petLegends3DSave'));if(old)save={...save,...old}}catch{}
-save.owned=[...new Set([0,...(save.owned||[])])];pets.forEach(p=>{if(save.pets?.[p.id])Object.assign(p,save.pets[p.id]);p.owned=save.owned.includes(p.id)});
-let active=pets[save.active]||pets[0],bossIndex=Math.min(save.boss,5),bossHP=bosses[bossIndex].hp;
-const player=new THREE.Group();const playerBody=new THREE.Mesh(new THREE.CapsuleGeometry(.4,.75,5,10),material('#316cdb'));playerBody.position.y=.95;playerBody.castShadow=true;player.add(playerBody);const playerHead=new THREE.Mesh(new THREE.SphereGeometry(.3,18,14),material('#f0c8a3'));playerHead.position.y=1.7;playerHead.castShadow=true;player.add(playerHead);const cape=new THREE.Mesh(new THREE.ConeGeometry(.4,.8,4),material('#242d54'));cape.position.set(0,1,-.32);cape.rotation.x=-.35;player.add(cape);scene.add(player);player.position.set(0,0,5);
-let bossMesh=null;
-function rebuildPet(p){if(p.mesh)scene.remove(p.mesh);p.stage=Math.min(10,Math.floor(p.level/5));p.mesh=createCreature(p.color,p.stage,false);scene.add(p.mesh);return p.mesh}
-pets.forEach(p=>{if(p.owned)rebuildPet(p)});
-function rebuildBoss(){if(bossMesh)scene.remove(bossMesh);let b=bosses[bossIndex];bossMesh=createCreature(b.color,Math.min(10,bossIndex+3),true);bossMesh.position.set(0,0,-9);scene.add(bossMesh);bossHP=b.hp;updateHud()}
-rebuildBoss();
-let moving={forward:false,back:false,left:false,right:false},messageTimer=0;
-function say(t){$('message').textContent=t;clearTimeout(messageTimer);messageTimer=setTimeout(()=>$('message').textContent='Move with arrow buttons or WASD. Defeat bosses to earn ₦.',3800)}
-function persist(){save.active=active.id;save.owned=pets.filter(p=>p.owned).map(p=>p.id);save.boss=bossIndex;save.pets={};pets.forEach(p=>save.pets[p.id]={level:p.level,xp:p.xp,hp:p.hp,maxHp:p.maxHp,power:p.power});try{localStorage.setItem('petLegends3DSave',JSON.stringify(save))}catch{}}
-function updateHud(){const b=bosses[bossIndex];$('money').textContent=save.money.toLocaleString();$('gems').textContent=save.gems;$('level').textContent=save.level;$('petTitle').textContent=active.name+' • '+active.element;$('petSub').textContent=`Evolution ${active.stage}/10 • Level ${active.level}/50 • Power ${active.power}`;$('petHpBar').style.width=(active.hp/active.maxHp*100)+'%';$('petHpText').textContent=`${Math.ceil(active.hp)} / ${active.maxHp} HP`;$('bossTitle').textContent=b.name;$('bossSub').textContent=`Dungeon ${bossIndex+1} • Reward ₦${b.reward}`;$('bossHpBar').style.width=(Math.max(0,bossHP)/b.hp*100)+'%';$('bossHpText').textContent=`${Math.ceil(Math.max(0,bossHP))} / ${b.hp} HP`;$('evolve').textContent=active.level>=50?'🌟 Final Evolution':'🌟 Evolve'}
-function levelUp(p,amount){if(p.level>=50)return;p.xp+=amount;let evolved=false;while(p.level<50&&p.xp>=p.level*60){p.xp-=p.level*60;p.level++;p.power+=4;p.maxHp+=12;p.hp=p.maxHp;if(p.level%5===0){p.stage=p.level/5;p.power+=15+p.stage*5;p.maxHp+=20+p.stage*8;p.hp=p.maxHp;evolved=true;if(p===active)say(`✨ EVOLUTION ${p.stage}/10! ${p.name} grew bigger and stronger!`)}}if(p.level>=50){p.xp=0;p.stage=10;evolved=true}save.level=Math.max(save.level,p.level);if(evolved&&p===active)rebuildPet(p);updateHud();persist()}
-function hit(special=false){if(active.hp<=0){say('Your pet is tired. Open Pets and use Rest.');return}let dmg=Math.round((active.power+active.level*3)*(special?2.1:1));bossHP-=dmg;active.hp=Math.max(0,active.hp-(bossIndex+1)*5);if(bossHP<=0){let b=bosses[bossIndex];save.money+=b.reward;save.gems+=1+Math.floor(bossIndex/2);save.wins++;levelUp(active,80+bossIndex*35);say(`VICTORY! ${b.name} defeated! You earned ₦${b.reward}.`);if(bossIndex<bosses.length-1){bossIndex++;save.unlocked=Math.max(save.unlocked,bossIndex+1);rebuildBoss()}}else say(`${active.name} dealt ${dmg} damage! The boss counterattacked.`);updateHud();persist()}
-$('attack').onclick=()=>hit(false);$('skill').onclick=()=>hit(true);
-$('train').onclick=()=>{if(save.money<100){say('Not enough naira. Defeat a boss to earn more.');return}save.money-=100;active.power+=5;active.maxHp+=10;active.hp=Math.min(active.maxHp,active.hp+10);levelUp(active,25);updateHud();persist();say(`${active.name} trained: +5 power and +10 max HP.`)};
-$('evolve').onclick=()=>{if(active.level<5){say(`Your pet needs level 5 to evolve. Current level: ${active.level}. Beat bosses and train!`);return}if(active.level>=50&&active.stage===10){say('Your pet has reached its final evolution!');return}let target=Math.min(50,Math.ceil((active.level+1)/5)*5);if(active.level%5===0)target=Math.min(50,active.level+5);let price=target*80;if(save.money<price){say(`Evolution to level ${target} costs ₦${price}. Earn more from bosses!`);return}save.money-=price;active.level=target;active.stage=target/5;active.power+=target*2;active.maxHp+=target*4;active.hp=active.maxHp;active.xp=0;rebuildPet(active);updateHud();persist();say(`🌟 EVOLUTION ${active.stage}/10! ${active.name} is now bigger and stronger!`)};
-function showPets(){const panel=$('collectionPanel');panel.style.display='block';const list=$('collection');list.innerHTML='';pets.forEach(p=>{const d=document.createElement('div');d.className='pet';const orb=document.createElement('div');orb.className='orb';orb.style.background=`radial-gradient(circle at 35% 30%,#fff9,${p.color},#111d35)`;orb.textContent=['🐢','🦦','🦎','🪨','🐺','⚡','🐉','🐈','🦌','🕷️','🌌','🛡️'][p.id%12];const title=document.createElement('b');title.textContent=p.name;const sm=document.createElement('small');sm.textContent=`${p.rarity} • ${p.element} • Lv ${p.level}`;const btn=document.createElement('button');if(p.owned){btn.textContent=p.id===active.id?'Equipped':'Equip';btn.onclick=()=>{active=p; if(!p.mesh)rebuildPet(p);panel.style.display='none';updateHud();persist();say(`${p.name} is now your companion.`)}}else{btn.textContent=`Buy ₦${p.cost}`;btn.disabled=save.money<p.cost;btn.onclick=()=>{if(save.money>=p.cost){save.money-=p.cost;p.owned=true;save.owned.push(p.id);active=p;rebuildPet(p);panel.style.display='none';updateHud();persist();say(`You bought ${p.name}! Equip your new companion.`)}}}d.append(orb,title,sm,btn);list.append(d)});updateHud()}
-$('pets').onclick=showPets;$('closePets').onclick=()=>$('collectionPanel').style.display='none';
-document.querySelectorAll('[data-move]').forEach(b=>{let k=b.dataset.move;const on=e=>{e.preventDefault();moving[k]=true},off=e=>{e.preventDefault();moving[k]=false};b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointerleave',off);b.addEventListener('pointercancel',off)});
-addEventListener('keydown',e=>{if(['w','ArrowUp'].includes(e.key))moving.forward=true;if(['s','ArrowDown'].includes(e.key))moving.back=true;if(['a','ArrowLeft'].includes(e.key))moving.left=true;if(['d','ArrowRight'].includes(e.key))moving.right=true});addEventListener('keyup',e=>{if(['w','ArrowUp'].includes(e.key))moving.forward=false;if(['s','ArrowDown'].includes(e.key))moving.back=false;if(['a','ArrowLeft'].includes(e.key))moving.left=false;if(['d','ArrowRight'].includes(e.key))moving.right=false});
-let last=performance.now(),time=0;function animate(now){requestAnimationFrame(animate);let dt=Math.min(.04,(now-last)/1000);last=now;time+=dt;
- const speed=5.2;let dx=(moving.right?1:0)-(moving.left?1:0),dz=(moving.back?1:0)-(moving.forward?1:0);if(dx||dz){let len=Math.hypot(dx,dz);player.position.x+=dx/len*speed*dt;player.position.z+=dz/len*speed*dt;player.position.x=THREE.MathUtils.clamp(player.position.x,-10,10);player.position.z=THREE.MathUtils.clamp(player.position.z,-1,11);player.rotation.y=Math.atan2(dx,dz)}
- if(active.mesh){let target=new THREE.Vector3(player.position.x-1.45,0,player.position.z+.6);active.mesh.position.lerp(target,Math.min(1,dt*3.5));active.mesh.rotation.y=Math.sin(time*1.4)*.15;if(dx||dz){active.mesh.position.y=Math.abs(Math.sin(time*9))*.08;player.position.y=Math.abs(Math.sin(time*9))*.04}else{active.mesh.position.y=Math.sin(time*2)*.04;player.position.y=0}}
- if(bossMesh){bossMesh.position.y=Math.sin(time*1.7)*.08;bossMesh.rotation.y=Math.sin(time*.6)*.2}
- camera.position.lerp(new THREE.Vector3(player.position.x,player.position.y+8,player.position.z+13),Math.min(1,dt*2.5));camera.lookAt(player.position.x,1,player.position.z-3);
- renderer.render(scene,camera)}
-requestAnimationFrame(animate);updateHud();persist();
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
-</script>
+
+  <div id="hud">
+    <div class="hud-box">
+      <div id="hero-display" style="color: #38bdf8; font-weight: bold;">Hero #1</div>
+      <div>HP: <span id="hp-val">1000 / 1000</span></div>
+    </div>
+    <button class="btn-shop-open" onclick="openShop()">NAIRA SHOP ₦</button>
+    <div class="hud-box" style="text-align: right;">
+      <div class="score-title">SCORE: <span id="score-val">0</span></div>
+      <div class="naira-text">₦<span id="wallet-val">0</span></div>
+    </div>
+  </div>
+
+  <div id="controls">
+    <div id="joystick-wrapper">
+      <div id="joystick-stick"></div>
+    </div>
+    <div class="action-group">
+      <button class="action-btn" id="btn-atk" onclick="triggerAttack()">ATTACK</button>
+      <button class="action-btn" id="btn-score" onclick="dunkEnergy()">DUNK ₦</button>
+      <button class="action-btn" id="btn-ult" onclick="triggerUltimate()">ULTIMATE</button>
+    </div>
+  </div>
+
+  <!-- START MENU MODAL -->
+  <div id="start-modal" class="modal">
+    <h1 style="color: #38bdf8; font-size: 2rem;">NAIJA UNITES 3D</h1>
+    <p style="color: #94a3b8; text-align: center; margin: 10px 0;">5v5 Mobile MOBA Arena</p>
+    <button class="btn-buy" style="padding: 12px 30px; font-size: 1.1rem;" onclick="startGame()">START BATTLE</button>
+  </div>
+
+  <!-- NAIRA SHOP MODAL -->
+  <div id="shop-modal" class="modal" style="display: none;">
+    <h2 style="color: #2ecc71;">IN-GAME NAIRA SHOP ₦</h2>
+    <p>Your Balance: ₦<span id="shop-wallet">0</span></p>
+    <div class="shop-items">
+      <div class="shop-row">
+        <div><b>Attack Boost (+50)</b><br><small style="color:#94a3b8">₦5,000</small></div>
+        <button class="btn-buy" onclick="buyUpgrade('atk')">BUY</button>
+      </div>
+      <div class="shop-row">
+        <div><b>Speed Boost (+20%)</b><br><small style="color:#94a3b8">₦8,000</small></div>
+        <button class="btn-buy" onclick="buyUpgrade('spd')">BUY</button>
+      </div>
+      <div class="shop-row">
+        <div><b>Max HP Boost (+500)</b><br><small style="color:#94a3b8">₦10,000</small></div>
+        <button class="btn-buy" onclick="buyUpgrade('hp')">BUY</button>
+      </div>
+    </div>
+    <button class="btn-close" onclick="closeShop()">CLOSE SHOP</button>
+  </div>
+
+  <div id="canvas-container"></div>
+
+  <script>
+    let scene, camera, renderer, player, wildBoss;
+    let bots = [];
+    let playerHP = 1000, maxHP = 1000, playerAtk = 100, playerSpeed = 0.18;
+    let walletNaira = 0, carriedEnergy = 0, teamScore = 0;
+    let isPlaying = false;
+
+    // Mobile Virtual Joystick Logic
+    let joyMoveX = 0, joyMoveZ = 0;
+    const joyWrapper = document.getElementById('joystick-wrapper');
+    const joyStick = document.getElementById('joystick-stick');
+
+    joyWrapper.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = joyWrapper.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      let deltaX = touch.clientX - centerX;
+      let deltaY = touch.clientY - centerY;
+      const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      const maxDist = 35;
+
+      if (dist > maxDist) {
+        deltaX = (deltaX / dist) * maxDist;
+        deltaY = (deltaY / dist) * maxDist;
+      }
+
+      joyStick.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+      joyMoveX = deltaX / maxDist;
+      joyMoveZ = deltaY / maxDist;
+    });
+
+    joyWrapper.addEventListener('touchend', () => {
+      joyStick.style.transform = `translate(0px, 0px)`;
+      joyMoveX = 0; joyMoveZ = 0;
+    });
+
+    function init3D() {
+      const container = document.getElementById('canvas-container');
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0b0e14);
+
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 22, 22);
+      camera.lookAt(0, 0, 0);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      container.appendChild(renderer.domElement);
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+      const light = new THREE.DirectionalLight(0xffffff, 0.8);
+      light.position.set(10, 30, 10);
+      scene.add(light);
+
+      // Arena
+      const arenaGeo = new THREE.CylinderGeometry(20, 20, 1, 32);
+      const arenaMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
+      const arena = new THREE.Mesh(arenaGeo, arenaMat);
+      arena.position.y = -0.5;
+      scene.add(arena);
+
+      // Player
+      const pGeo = new THREE.CylinderGeometry(0.6, 0.6, 1.8, 16);
+      const pMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8 });
+      player = new THREE.Mesh(pGeo, pMat);
+      player.position.set(0, 1, 10);
+      scene.add(player);
+
+      // Boss
+      const bGeo = new THREE.BoxGeometry(2.5, 3.5, 2.5);
+      const bMat = new THREE.MeshStandardMaterial({ color: 0xef4444 });
+      wildBoss = new THREE.Mesh(bGeo, bMat);
+      wildBoss.position.set(0, 1.75, 0);
+      scene.add(wildBoss);
+
+      // Spawn AI Bots (5v5 simulation)
+      for(let i=0; i<4; i++) spawnBot(0x22c55e, true);  // Green Teammates
+      for(let i=0; i<5; i++) spawnBot(0xef4444, false); // Red Enemies
+
+      animate();
+    }
+
+    function spawnBot(color, isTeam) {
+      const geo = new THREE.CylinderGeometry(0.5, 0.5, 1.6, 16);
+      const mat = new THREE.MeshStandardMaterial({ color: color });
+      const bot = new THREE.Mesh(geo, mat);
+      bot.position.set((Math.random() - 0.5) * 20, 1, (Math.random() - 0.5) * 20);
+      scene.add(bot);
+      bots.push({ mesh: bot, isTeam: isTeam });
+    }
+
+    function updateMovement() {
+      if (!isPlaying || !player) return;
+
+      player.position.x += joyMoveX * playerSpeed;
+      player.position.z += joyMoveZ * playerSpeed;
+
+      // Arena boundary lock
+      const dist = Math.sqrt(player.position.x**2 + player.position.z**2);
+      if (dist > 18) {
+        player.position.x *= 18 / dist;
+        player.position.z *= 18 / dist;
+      }
+
+      // Simple AI bot movements
+      bots.forEach(b => {
+        b.mesh.position.x += (Math.random() - 0.5) * 0.08;
+        b.mesh.position.z += (Math.random() - 0.5) * 0.08;
+      });
+    }
+
+    function triggerAttack() {
+      if (!isPlaying || !wildBoss) return;
+      if (player.position.distanceTo(wildBoss.position) < 4.5) {
+        carriedEnergy += 10;
+        walletNaira += 2500;
+        updateHUD();
+      }
+    }
+
+    function triggerUltimate() {
+      if (!isPlaying || !wildBoss) return;
+      if (player.position.distanceTo(wildBoss.position) < 8) {
+        carriedEnergy += 25;
+        walletNaira += 6000;
+        updateHUD();
+      }
+    }
+
+    function dunkEnergy() {
+      if (!isPlaying || carriedEnergy <= 0) return;
+      teamScore += carriedEnergy;
+      walletNaira += carriedEnergy * 500;
+      carriedEnergy = 0;
+      updateHUD();
+    }
+
+    function buyUpgrade(type) {
+      if (type === 'atk' && walletNaira >= 5000) { walletNaira -= 5000; playerAtk += 50; }
+      if (type === 'spd' && walletNaira >= 8000) { walletNaira -= 8000; playerSpeed *= 1.2; }
+      if (type === 'hp' && walletNaira >= 10000) { walletNaira -= 10000; maxHP += 500; playerHP += 500; }
+      updateHUD();
+    }
+
+    function openShop() { document.getElementById('shop-modal').style.display = 'flex'; }
+    function closeShop() { document.getElementById('shop-modal').style.display = 'none'; }
+
+    function updateHUD() {
+      document.getElementById('hp-val').innerText = `${playerHP} / ${maxHP}`;
+      document.getElementById('score-val').innerText = teamScore;
+      document.getElementById('wallet-val').innerText = walletNaira.toLocaleString();
+      document.getElementById('shop-wallet').innerText = walletNaira.toLocaleString();
+    }
+
+    function startGame() {
+      document.getElementById('start-modal').style.display = 'none';
+      isPlaying = true;
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      updateMovement();
+      if (isPlaying && wildBoss) wildBoss.rotation.y += 0.01;
+      renderer.render(scene, camera);
+    }
+
+    window.onload = init3D;
+  </script>
 </body>
-</html>
+ </html>
+       
